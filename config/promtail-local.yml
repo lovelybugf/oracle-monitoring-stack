@@ -1,0 +1,100 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Oracle Alert Logs
+  - job_name: oracle-alert-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: oracle-alert-logs
+          service_name: oracle
+          log_type: alert
+          environment: production
+          __path__: /var/log/oracle/**/trace/alert*.log
+    pipeline_stages:
+      - match:
+          selector: '{job="oracle-alert-logs"}'
+          stages:
+            - labels:
+                level: info
+
+  # Oracle Trace Logs
+  - job_name: oracle-trace-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: oracle-trace-logs
+          service_name: oracle
+          log_type: trace
+          environment: production
+          __path__: /var/log/oracle/**/trace/*.trc
+    pipeline_stages:
+      - match:
+          selector: '{job="oracle-trace-logs"}'
+          stages:
+            - labels:
+                level: trace
+
+  # Oracle XML Logs
+  - job_name: oracle-xml-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: oracle-xml-logs
+          service_name: oracle
+          log_type: xml
+          environment: production
+          __path__: /var/log/oracle/**/alert/*.xml
+    pipeline_stages:
+      - match:
+          selector: '{job="oracle-xml-logs"}'
+          stages:
+            - labels:
+                level: xml
+
+  # Oracle Listener Logs
+  - job_name: oracle-listener-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: oracle-listener-logs
+          service_name: oracle
+          log_type: listener
+          environment: production
+          __path__: /var/log/oracle/**/listener/trace/*.log
+    pipeline_stages:
+      - match:
+          selector: '{job="oracle-listener-logs"}'
+          stages:
+            - labels:
+                level: listener
+
+  # Oracle Client Logs
+  - job_name: oracle-client-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: oracle-client-logs
+          service_name: oracle
+          log_type: client
+          environment: production
+          __path__: /var/log/oracle/**/trace/sqlnet.log
+    pipeline_stages:
+      - match:
+          selector: '{job="oracle-client-logs"}'
+          stages:
+            - labels:
+                level: client

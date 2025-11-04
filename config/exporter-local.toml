@@ -1,0 +1,111 @@
+# OracleDB Exporter configuration for local Oracle Database
+
+# Default values for custom queries
+default_metrics = [
+    "oracledb_cpu_time",
+    "oracledb_sessions",
+    "oracledb_processes",
+    "oracledb_tablespace_bytes",
+    "oracledb_buffer_pool_stat",
+    "oracledb_wait_time",
+    "oracledb_io_bytes",
+    "oracledb_redo_log_bytes"
+]
+
+# Custom queries for Oracle metrics
+[[metric]]
+context = "sessions"
+labels = [ "status", "type", "username" ]
+request = "SELECT status, type, username, count(*) as value FROM v$session GROUP BY status, type, username"
+metricdesc = [ { name = "oracledb_sessions", help = "Number of sessions", type = "gauge" } ]
+
+[[metric]]
+context = "processes"
+labels = [ "program", "status" ]
+request = "SELECT program, status, count(*) as value FROM v$process GROUP BY program, status"
+metricdesc = [ { name = "oracledb_processes", help = "Number of processes", type = "gauge" } ]
+
+[[metric]]
+context = "tablespace"
+labels = [ "tablespace_name", "status" ]
+request = "SELECT tablespace_name, status, sum(bytes) as value FROM dba_data_files GROUP BY tablespace_name, status"
+metricdesc = [ { name = "oracledb_tablespace_bytes", help = "Tablespace size in bytes", type = "gauge" } ]
+
+[[metric]]
+context = "buffer_pool"
+labels = [ "name" ]
+request = "SELECT name, sum(bytes) as value FROM v$buffer_pool GROUP BY name"
+metricdesc = [ { name = "oracledb_buffer_pool_bytes", help = "Buffer pool size in bytes", type = "gauge" } ]
+
+[[metric]]
+context = "wait_time"
+labels = [ "wait_class", "event" ]
+request = "SELECT wait_class, event, total_waits as value FROM v$system_event WHERE wait_class != 'Idle' ORDER BY total_waits DESC"
+metricdesc = [ { name = "oracledb_wait_events", help = "Wait events count", type = "counter" } ]
+
+[[metric]]
+context = "io_stats"
+labels = [ "name" ]
+request = "SELECT name, phyrds + phywrts as value FROM v$filestat fs, v$datafile df WHERE fs.file# = df.file#"
+metricdesc = [ { name = "oracledb_io_operations", help = "I/O operations count", type = "counter" } ]
+
+[[metric]]
+context = "redo_log"
+labels = [ "group#" ]
+request = "SELECT group#, bytes as value FROM v$log"
+metricdesc = [ { name = "oracledb_redo_log_bytes", help = "Redo log size in bytes", type = "gauge" } ]
+
+[[metric]]
+context = "cpu_time"
+labels = [ "stat_name" ]
+request = "SELECT stat_name, value FROM v$sys_time_model WHERE stat_name IN ('DB CPU', 'DB time', 'background cpu time')"
+metricdesc = [ { name = "oracledb_cpu_time", help = "CPU time in microseconds", type = "counter" } ]
+
+# Additional Performance Metrics
+[[metric]]
+context = "memory_stats"
+labels = [ "pool", "component" ]
+request = "SELECT pool, component, bytes as value FROM v$sgastat WHERE pool IN ('shared pool', 'large pool', 'java pool')"
+metricdesc = [ { name = "oracledb_sga_bytes", help = "SGA memory usage in bytes", type = "gauge" } ]
+
+[[metric]]
+context = "pga_stats"
+labels = [ "name" ]
+request = "SELECT name, value FROM v$pgastat WHERE name IN ('total PGA allocated', 'total PGA inuse', 'total freeable PGA memory')"
+metricdesc = [ { name = "oracledb_pga_bytes", help = "PGA memory usage in bytes", type = "gauge" } ]
+
+[[metric]]
+context = "database_size"
+labels = [ "metric_name" ]
+request = "SELECT 'Database Size' as metric_name, sum(bytes) as value FROM dba_data_files"
+metricdesc = [ { name = "oracledb_database_size_bytes", help = "Total database size in bytes", type = "gauge" } ]
+
+[[metric]]
+context = "tablespace_usage"
+labels = [ "tablespace_name", "status" ]
+request = "SELECT tablespace_name, status, sum(bytes) as value FROM dba_free_space GROUP BY tablespace_name, status"
+metricdesc = [ { name = "oracledb_free_space_bytes", help = "Free space in tablespaces", type = "gauge" } ]
+
+[[metric]]
+context = "active_sessions"
+labels = [ "status", "machine" ]
+request = "SELECT status, machine, count(*) as value FROM v$session WHERE username IS NOT NULL GROUP BY status, machine"
+metricdesc = [ { name = "oracledb_active_sessions", help = "Active sessions by status and machine", type = "gauge" } ]
+
+[[metric]]
+context = "lock_waits"
+labels = [ "lock_type", "mode_held" ]
+request = "SELECT lock_type, mode_held, count(*) as value FROM v$locked_object lo, dba_objects o WHERE lo.object_id = o.object_id GROUP BY lock_type, mode_held"
+metricdesc = [ { name = "oracledb_locks", help = "Number of locks by type and mode", type = "gauge" } ]
+
+[[metric]]
+context = "backup_status"
+labels = [ "status" ]
+request = "SELECT status, count(*) as value FROM v$backup_set_details GROUP BY status"
+metricdesc = [ { name = "oracledb_backup_status", help = "Backup status counts", type = "gauge" } ]
+
+[[metric]]
+context = "archive_logs"
+labels = [ "status" ]
+request = "SELECT status, count(*) as value FROM v$archive_dest_status GROUP BY status"
+metricdesc = [ { name = "oracledb_archive_dest_status", help = "Archive destination status", type = "gauge" } ]

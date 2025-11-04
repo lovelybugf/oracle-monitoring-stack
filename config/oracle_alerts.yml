@@ -1,0 +1,141 @@
+groups:
+  - name: oracle_alerts
+    rules:
+      # High Session Count Alert (Raised threshold to avoid false positives)
+      - alert: OracleHighSessionCount
+        expr: sum(oracledb_sessions_value) > 100
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Oracle Database has extremely high session count"
+          description: "Oracle Database has {{ $value }} active sessions, which is above the threshold of 100"
+
+      # High Process Count Alert (Raised threshold to avoid false positives)
+      - alert: OracleHighProcessCount
+        expr: oracledb_process_count > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Oracle Database has very high process count"
+          description: "Oracle Database has {{ $value }} processes, which is above the threshold of 60"
+
+      # Tablespace Space Low Alert
+      - alert: OracleTablespaceSpaceLow
+        expr: (oracledb_free_space_bytes / oracledb_tablespace_bytes) * 100 < 10
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Oracle Tablespace space is critically low"
+          description: "Tablespace {{ $labels.tablespace_name }} has only {{ $value }}% free space remaining"
+
+      # Database Down Alert - Immediate notification
+      - alert: OracleDatabaseDown
+        expr: up{job="oracle-db"} == 0
+        for: 0s
+        labels:
+          severity: critical
+        annotations:
+          summary: "🚨 CRITICAL: Oracle Database is DOWN"
+          description: "Oracle Database exporter is not responding - IMMEDIATE ACTION REQUIRED"
+
+      # High CPU Usage Alert - Oracle Exporter (Oracle DB CPU metrics not available)
+      - alert: OracleHighCPUUsage
+        expr: rate(process_cpu_seconds_total[5m]) * 100 > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Oracle Exporter has high CPU usage"
+          description: "Oracle Exporter CPU usage is {{ $value }}%, which may indicate high Oracle DB load"
+
+
+      # Archive Log Destination Error - Immediate notification
+      - alert: OracleArchiveLogError
+        expr: oracledb_archive_dest_status{status="ERROR"} > 0
+        for: 0s
+        labels:
+          severity: critical
+        annotations:
+          summary: "🚨 CRITICAL: Oracle Archive Log Error"
+          description: "Archive log destination has error status - IMMEDIATE ACTION REQUIRED"
+
+      # Load Test Alert 1: High Active Sessions (Lowered threshold for easier testing)
+      - alert: OracleLoadTestActiveSessions
+        expr: sum(oracledb_sessions_value{status="ACTIVE"}) > 60
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "🔥 LOAD TEST: High Active Sessions Detected"
+          description: "Active sessions: {{ $value }} (>60) - Load test is running!"
+
+      # Load Test Alert 2: High Execute Count Rate (Lowered threshold for easier testing)
+      - alert: OracleLoadTestExecuteRate
+        expr: rate(oracledb_activity_execute_count[2m]) > 30
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "🔥 LOAD TEST: High Query Execute Rate"
+          description: "Execute rate: {{ $value }} queries/sec (>30) - Load test is running!"
+
+      # Load Test Alert 3: High Process Count (for concurrent session/process load)
+      - alert: OracleLoadTestProcessCount
+        expr: oracledb_process_count > 90
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "🔥 LOAD TEST: High Oracle Process Count"
+          description: "Oracle process count is {{ $value }} (>90) - concurrent connections/processes are high"
+
+# The following top-level rules were commented out to keep YAML valid; they
+# duplicate existing rules above and can be re-added under groups.rules if needed.
+#
+# - alert: OracleHighMemoryUsage
+#   expr: (process_resident_memory_bytes / 1024 / 1024) > 300
+#   for: 30s
+#   labels:
+#     severity: warning
+#   annotations:
+#     summary: "Oracle Exporter has high memory usage"
+#     description: "Oracle Exporter memory usage is {{ $value }}MB, which is above the threshold of 300MB"
+#
+# - alert: OracleHighFailedTransactions
+#   expr: rate(oracledb_activity_user_rollbacks[5m]) > 0.01
+#   for: 30s
+#   labels:
+#     severity: warning
+#   annotations:
+#     summary: "Oracle Database has high failed transaction rate"
+#     description: "Oracle Database rollback rate is {{ $value }} transactions/sec, indicating query failures"
+#
+# - alert: OracleExporterErrors
+#   expr: oracledb_exporter_last_scrape_error > 0
+#   for: 30s
+#   labels:
+#     severity: critical
+#   annotations:
+#     summary: "Oracle Exporter has scrape errors"
+#     description: "Oracle Exporter is experiencing errors while collecting metrics"
+#
+# - alert: OracleHighInactiveSessions
+#   expr: sum(oracledb_sessions_value{status="INACTIVE"}) > 20
+#   for: 30s
+#   labels:
+#     severity: warning
+#   annotations:
+#     summary: "Oracle Database has high inactive session count"
+#     description: "Oracle Database has {{ $value }} inactive sessions, which may indicate connection issues"
+#
+# - alert: OracleExporterSlowScrape
+#   expr: oracledb_exporter_last_scrape_duration_seconds > 5
+#   for: 30s
+#   labels:
+#     severity: warning
+#   annotations:
+#     summary: "Oracle Exporter is slow to scrape metrics"
+#     description: "Oracle Exporter scrape duration is {{ $value }}s, which is above the threshold of 5s"

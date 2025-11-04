@@ -1,0 +1,25 @@
+global:
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'nam8dmd@gmail.com'
+  smtp_auth_username: 'nam8dmd@gmail.com'
+  smtp_auth_password: 'mxdd pjgo okqp eopu'
+
+route:
+  group_by: ['alertname']
+  group_wait: 0s
+  group_interval: 1s
+  repeat_interval: 2h
+  receiver: 'discord-alerts'
+
+receivers:
+  - name: 'discord-alerts'
+    webhook_configs:
+      - url: 'http://webhook-converter:5001/'
+        send_resolved: true
+
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'dev', 'instance']
