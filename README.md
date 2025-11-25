@@ -1,4 +1,4 @@
-# Oracle Database Monitoring System
+# Oracle Database Monitoring System ( English Below)
 
 Hệ thống monitoring Oracle Database hoàn chỉnh với Prometheus, Grafana, AlertManager và Discord notifications.
 
@@ -166,3 +166,179 @@ Nếu gặp vấn đề:
 2. Sử dụng monitoring_manager.bat để test system health
 3. Kiểm tra cấu hình trong thư mục `config/`
 4. Đảm bảo Oracle Database đang chạy và accessible
+
+
+
+
+ENGLISH VER:
+📁 Directory Structure
+oracle-monitoring/
+├── config/                          # Configuration files
+│   ├── prometheus-local.yml         # Prometheus configuration
+│   ├── alertmanager.yml             # AlertManager configuration
+│   ├── oracle_alerts.yml            # Oracle alert rules
+│   ├── loki-config.yml              # Loki configuration
+│   ├── promtail-local.yml           # Promtail configuration
+│   └── exporter-local.toml          # Oracle Exporter configuration
+├── scripts/                         # Scripts and utilities
+│   ├── Dockerfile.webhook           # Dockerfile for webhook converter
+│   └── discord-webhook-converter.py # Discord webhook converter
+├── sql/                             # SQL scripts
+│   ├── setup_monitor_user_local.sql # Create monitoring user
+│   ├── quick_load_test.sql          # Quick load test
+│   └── simple_load_test.sql         # Simple load test
+├── dashboards/                      # Grafana dashboards
+│   ├── 3333_rev1.json               # Main Oracle dashboard
+│   ├── grafana-oracle-focused-dashboard.json
+│   └── grafana-working-dashboard.json
+├── docs/                            # Documentation
+│   ├── README.md
+│   ├── LOAD_TEST_INSTRUCTIONS.md
+│   ├── ORACLE_DASHBOARD_3333_METRICS_EXPLANATION.md
+│   └── GRAFANA_DASHBOARD_METRICS_EXPLANATION.md
+├── data_mau/                        # Sample data (CSV files)
+│   ├── courses.csv
+│   ├── danh_sach_tai_khoan.csv
+│   ├── technology.csv
+│   ├── topic.csv
+│   └── tracks.csv
+├── docker-compose-local-oracle.yml  # Docker Compose configuration
+├── monitoring_manager.bat           # Management script (Windows)
+└── README.md                        # This file
+
+🚀 Quick Start
+1. Start the Monitoring Stack
+# Using the management script
+monitoring_manager.bat
+
+# Or run Docker Compose manually
+docker-compose -f docker-compose-local-oracle.yml up -d
+
+2. Access the Monitoring Interfaces
+Service	URL
+Grafana	http://localhost:3000
+ (admin/admin)
+Prometheus	http://localhost:9090
+
+AlertManager	http://localhost:9093
+
+Oracle Exporter	http://localhost:9161/metrics
+
+Loki	http://localhost:3100
+
+Webhook Converter	http://localhost:5002/health
+🔧 Configuration Overview
+Alert Rules (config/oracle_alerts.yml)
+
+The following alert rules are included:
+
+Alert	Severity	Description
+OracleDatabaseDown	Critical	Triggered when database is unreachable
+OracleLoadTestActiveSessions	Warning	For load test monitoring (easy to trigger)
+OracleLoadTestExecuteRate	Warning	For execution rate spikes
+OracleHighSessionCount	Warning	Too many active sessions
+OracleHighProcessCount	Warning	Too many DB processes
+OracleHighCPUUsage	Warning	High CPU usage
+Discord Notifications
+
+AlertManager sends alerts to the webhook converter
+
+Converter formats messages and forwards them to Discord
+
+Discord webhook URL is configured in scripts/discord-webhook-converter.py
+
+📊 Monitoring Capabilities
+Collected Metrics
+
+The system collects the following Oracle-related metrics:
+
+Active sessions & processes
+
+CPU usage
+
+Memory usage
+
+Tablespace usage
+
+Top SQL queries
+
+Wait events
+
+Query execution rate
+
+Dashboards
+
+3333_rev1.json → Main Oracle Monitoring Dashboard
+
+Additional dashboards for deep analysis and troubleshooting
+
+🧪 Load Testing
+Quick Load Test
+@sql/quick_load_test.sql
+
+Simple Load Test
+@sql/simple_load_test.sql
+
+
+Run these scripts in SQL Developer or any Oracle SQL client.
+
+🛠️ System Management
+Using monitoring_manager.bat
+Option	Description
+1	Start Monitoring Stack
+2	Stop Monitoring Stack
+3	Restart Monitoring Stack
+4	Test System Health
+5	Create Monitor User
+6	Open Monitoring Interfaces
+7	View Logs
+8	Reload Prometheus Configuration
+9	Check Active Alerts
+Reload Prometheus Configuration
+
+No restart required:
+
+curl -X POST http://localhost:9090/-/reload
+
+🔍 Troubleshooting Guide
+View Logs
+# All containers
+docker-compose -f docker-compose-local-oracle.yml logs
+
+# Specific container
+docker logs prometheus
+docker logs alertmanager
+docker logs webhook-converter
+
+Check Prometheus Alerts
+curl http://localhost:9090/api/v1/alerts
+
+Check AlertManager Alerts
+curl http://localhost:9093/api/v1/alerts
+
+Check Webhook Converter Status
+curl http://localhost:5002/health
+
+📝 Notes
+
+All services run inside the Docker network monitoring
+
+The webhook converter listens on port 5002
+
+Discord webhook is defined inside the converter script
+
+Prometheus configuration supports live reload
+
+Load test scripts are designed for quick stress testing
+
+🆘 Support
+
+If you encounter issues:
+
+Check logs of all containers
+
+Use monitoring_manager.bat to diagnose system health
+
+Verify configuration files in config/
+
+Ensure Oracle Database is running and accessible
