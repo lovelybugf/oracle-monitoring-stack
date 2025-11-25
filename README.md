@@ -171,40 +171,6 @@ Nếu gặp vấn đề:
 
 
 ENGLISH VER:
-📁 Directory Structure
-oracle-monitoring/
-├── config/                          # Configuration files
-│   ├── prometheus-local.yml         # Prometheus configuration
-│   ├── alertmanager.yml             # AlertManager configuration
-│   ├── oracle_alerts.yml            # Oracle alert rules
-│   ├── loki-config.yml              # Loki configuration
-│   ├── promtail-local.yml           # Promtail configuration
-│   └── exporter-local.toml          # Oracle Exporter configuration
-├── scripts/                         # Scripts and utilities
-│   ├── Dockerfile.webhook           # Dockerfile for webhook converter
-│   └── discord-webhook-converter.py # Discord webhook converter
-├── sql/                             # SQL scripts
-│   ├── setup_monitor_user_local.sql # Create monitoring user
-│   ├── quick_load_test.sql          # Quick load test
-│   └── simple_load_test.sql         # Simple load test
-├── dashboards/                      # Grafana dashboards
-│   ├── 3333_rev1.json               # Main Oracle dashboard
-│   ├── grafana-oracle-focused-dashboard.json
-│   └── grafana-working-dashboard.json
-├── docs/                            # Documentation
-│   ├── README.md
-│   ├── LOAD_TEST_INSTRUCTIONS.md
-│   ├── ORACLE_DASHBOARD_3333_METRICS_EXPLANATION.md
-│   └── GRAFANA_DASHBOARD_METRICS_EXPLANATION.md
-├── data_mau/                        # Sample data (CSV files)
-│   ├── courses.csv
-│   ├── danh_sach_tai_khoan.csv
-│   ├── technology.csv
-│   ├── topic.csv
-│   └── tracks.csv
-├── docker-compose-local-oracle.yml  # Docker Compose configuration
-├── monitoring_manager.bat           # Management script (Windows)
-└── README.md                        # This file
 
 🚀 Quick Start
 1. Start the Monitoring Stack
